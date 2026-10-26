@@ -1,0 +1,5 @@
+data_dir: data
+graph_backend: networkx
+llm_mode: mock
+default_role: outpatient_clerk
+max_evidence: 8

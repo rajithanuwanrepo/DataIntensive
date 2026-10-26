@@ -1,0 +1,62 @@
+[
+  {
+    "patient_id": "P-1000",
+    "name": "Fictional Patient 1",
+    "date_of_birth": "1983-01-01",
+    "phone": "555-0000"
+  },
+  {
+    "patient_id": "P-1001",
+    "name": "Fictional Patient 2",
+    "date_of_birth": "1976-01-01",
+    "phone": "555-0001"
+  },
+  {
+    "patient_id": "P-1002",
+    "name": "Fictional Patient 3",
+    "date_of_birth": "2001-01-01",
+    "phone": "555-0002"
+  },
+  {
+    "patient_id": "P-1003",
+    "name": "Fictional Patient 4",
+    "date_of_birth": "1969-01-01",
+    "phone": "555-0003"
+  },
+  {
+    "patient_id": "P-1004",
+    "name": "Fictional Patient 5",
+    "date_of_birth": "1973-01-01",
+    "phone": "555-0004"
+  },
+  {
+    "patient_id": "P-1005",
+    "name": "Fictional Patient 6",
+    "date_of_birth": "1968-01-01",
+    "phone": "555-0005"
+  },
+  {
+    "patient_id": "P-1006",
+    "name": "Fictional Patient 7",
+    "date_of_birth": "1961-01-01",
+    "phone": "555-0006"
+  },
+  {
+    "patient_id": "P-1007",
+    "name": "Fictional Patient 8",
+    "date_of_birth": "1999-01-01",
+    "phone": "555-0007"
+  },
+  {
+    "patient_id": "P-1008",
+    "name": "Fictional Patient 9",
+    "date_of_birth": "1995-01-01",
+    "phone": "555-0008"
+  },
+  {
+    "patient_id": "P-1009",
+    "name": "Fictional Patient 10",
+    "date_of_birth": "1995-01-01",
+    "phone": "555-0009"
+  }
+]
