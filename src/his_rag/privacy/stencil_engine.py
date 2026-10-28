@@ -4,91 +4,111 @@ from __future__ import annotations
 
 from typing import Any
 
-
-EVENT_ENTITY = {
-    "patient_registration": "Patient",
-    "encounter": "Appointment",
-    "follow_up_appointment": "Appointment",
-    "lab_order": "Order",
-    "imaging_order": "Order",
-    "observation_result": "Result",
-}
+from his_rag.graph.event_graph_types import EventGraphTypes
 
 
-def _attributes_for(record: dict[str, Any], entity: str) -> dict[str, Any]:
-    if entity == "Patient":
+def _attributes_for(record: dict[str, Any], event_type: str) -> dict[str, Any]:
+    if event_type == "PatientRegistrationEvent":
         values = {"patientId": record.get("patient_id")}
-    elif entity == "Appointment":
+    elif event_type == "AppointmentEncounterEvent":
         values = {
             "appointmentId": record.get("appointment_id"),
             "scheduledDate": record.get("appointment_datetime"),
             "status": record.get("appointment_status"),
         }
-    elif entity == "Order":
+    elif event_type in {"LabOrderEvent", "ImagingOrderEvent"}:
         values = {
             "orderId": record.get("event_id"),
             "orderType": record.get("event_type"),
             "status": record.get("order_status"),
         }
-    else:
+    elif event_type == "ObservationResultEvent":
         values = {
             "completionStatus": record.get("completion_status"),
             "completedAt": record.get("completed_at"),
         }
+    else:
+        values = {}
     return values
 
 
 def apply_stencil(record: dict[str, Any], stencil: dict[str, Any]) -> dict[str, Any] | None:
-    entity = EVENT_ENTITY.get(str(record.get("event_type", "")))
-    if entity is None or entity not in stencil.get("entities", {}):
+    event_type = str(record.get("event_type", ""))
+    if event_type not in stencil.get("entities", {}):
         return None
 
-    permitted = set(stencil["entities"][entity])
+    permitted = set(stencil["entities"][event_type])
     attributes = {
-        key: value
-        for key, value in _attributes_for(record, entity).items()
+        key: value for key, value in _attributes_for(record, event_type).items()
         if key in permitted and value is not None
     }
     entity_id_field = {
-        "Patient": "patient_id",
-        "Appointment": "appointment_id",
-        "Order": "event_id",
-        "Result": "event_id",
-    }[entity]
+        "PatientRegistrationEvent": "patient_id",
+        "AppointmentEncounterEvent": "appointment_id",
+        "LabOrderEvent": "event_id",
+        "ImagingOrderEvent": "event_id",
+        "ObservationResultEvent": "event_id",
+    }[event_type]
     entity_id = record.get(entity_id_field)
     relationships: list[dict[str, str]] = []
     relationship_names = set(stencil.get("relationships", []))
-
     event_type = record.get("event_type")
-    if event_type == "patient_registration" and "hasPatientRegistrationEvent" in relationship_names:
-        relationships.append({
-            "type": "hasPatientRegistrationEvent",
-            "sourceId": str(record["patient_id"]),
-            "targetId": str(record["event_id"]),
-        })
-    elif event_type in {"encounter", "follow_up_appointment"} and "hasAppointmentEncounterEvent" in relationship_names:
-        relationships.append({
-            "type": "hasAppointmentEncounterEvent",
-            "sourceId": str(record["patient_id"]),
-            "targetId": str(record["appointment_id"]),
-        })
-    elif event_type == "lab_order" and "hasLabOrderEvent" in relationship_names:
-        relationships.append({
-            "type": "hasLabOrderEvent",
-            "sourceId": str(record["encounter_id"]),
-            "targetId": str(record["event_id"]),
-        })
-    elif event_type == "imaging_order" and "hasImagingOrderEvent" in relationship_names:
-        relationships.append({
-            "type": "hasImagingOrderEvent",
-            "sourceId": str(record["encounter_id"]),
-            "targetId": str(record["event_id"]),
-        })
-    elif event_type == "observation_result" and "hasObservationResultEvent" in relationship_names:
-        relationships.append({
-            "type": "hasObservationResultEvent",
-            "sourceId": str(record["order_id"]),
-            "targetId": str(record["event_id"]),
-        })
+    relationship_type = EventGraphTypes.relationship_for_record(record)
+    if relationship_type in relationship_names:
+        if event_type == "PatientRegistrationEvent":
+            source_id, target_id = record.get("patient_id"), record.get("event_id")
+        elif event_type == "AppointmentEncounterEvent":
+            source_id, target_id = record.get("patient_id"), record.get("appointment_id")
+        elif event_type in {"LabOrderEvent", "ImagingOrderEvent"}:
+            source_id, target_id = record.get("encounter_id"), record.get("event_id")
+        else:
+            source_id, target_id = record.get("order_id"), record.get("event_id")
+        if source_id is not None and target_id is not None:
+            relationships.append({
+                "type": relationship_type,
+                "sourceId": str(source_id),
+                "targetId": str(target_id),
+            })
 
-    return {"entity": entity, "id": entity_id, "attributes": attributes, "relationships": relationships}
+    return {"entity": event_type, "id": entity_id, "attributes": attributes, "relationships": relationships}
+
+
+def apply_stencil_to_subgraph(
+    subgraph: dict[str, list[dict[str, Any]]],
+    stencil: dict[str, Any],
+) -> dict[str, list[dict[str, Any]]]:
+    allowed_relationships = set(stencil.get("relationships", []))
+    filtered_nodes: list[dict[str, Any]] = []
+    retained_ids: set[str] = set()
+
+    for node in subgraph.get("nodes", []):
+        properties = node.get("properties", {})
+        node_type = node.get("type")
+        node_id = str(node.get("id", ""))
+        if node_type == "Patient":
+            permitted = set(stencil.get("entities", {}).get("PatientRegistrationEvent", []))
+            attributes = {
+                "patientId": properties["patient_id"]
+            } if "patientId" in permitted and properties.get("patient_id") is not None else {}
+            projected = {"entity": "Patient", "attributes": attributes}
+        else:
+            projected = apply_stencil(properties, stencil)
+            if projected is None:
+                continue
+
+        filtered_nodes.append({
+            "id": node_id,
+            "type": node_type,
+            "entity": projected["entity"],
+            "attributes": projected["attributes"],
+        })
+        retained_ids.add(node_id)
+
+    filtered_relationships = [
+        dict(relationship)
+        for relationship in subgraph.get("relationships", [])
+        if relationship.get("type") in allowed_relationships
+        and str(relationship.get("sourceId")) in retained_ids
+        and str(relationship.get("targetId")) in retained_ids
+    ]
+    return {"nodes": filtered_nodes, "relationships": filtered_relationships}

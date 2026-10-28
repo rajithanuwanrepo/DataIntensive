@@ -1,10 +1,11 @@
 {
     "role": "outpatient_clerk",
     "entities": {
-        "Patient": ["patientId"],
-        "Appointment": ["appointmentId", "scheduledDate", "status"],
-        "Order": ["orderId", "orderType", "status"],
-        "Result": ["completionStatus", "completedAt"]
+        "PatientRegistrationEvent": ["patientId"],
+        "AppointmentEncounterEvent": ["appointmentId", "scheduledDate", "status"],
+        "LabOrderEvent": ["orderId", "orderType", "status"],
+        "ImagingOrderEvent": ["orderId", "orderType", "status"],
+        "ObservationResultEvent": ["completionStatus", "completedAt"]
     },
     "relationships": [
         "hasPatientRegistrationEvent",

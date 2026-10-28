@@ -9,14 +9,6 @@ from his_rag.models.events import (
     ObservationResultEvent,
     PatientRegistrationEvent,
 )
-from .workflow_rules import (
-    ENCOUNTER,
-    FOLLOW_UP_APPOINTMENT,
-    IMAGING_ORDER,
-    LAB_ORDER,
-    OBSERVATION_RESULT,
-    PATIENT_REGISTRATION,
-)
 
 
 def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -31,7 +23,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
         times = [f"2025-01-{day:02d}T{hour:02d}:00:00Z" for hour in range(9, 15)]
 
         registration = PatientRegistrationEvent(
-            event_id=event_ids[0], patient_id=patient_id, event_type=PATIENT_REGISTRATION,
+            event_id=event_ids[0], patient_id=patient_id, event_type=PatientRegistrationEvent.__name__,
             occurred_at=times[0], department="Patient Access",
             actor_id="STAFF-REG-01", related_event_id="", description="Fictional outpatient registration.",
             encounter_id=None,
@@ -39,7 +31,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
             consent_status="documented", external_record_id=f"EXT-{patient_index + 1:05d}",
         )
         encounter = AppointmentEncounterEvent(
-            event_id=event_ids[1], patient_id=patient_id, event_type=ENCOUNTER,
+            event_id=event_ids[1], patient_id=patient_id, event_type=AppointmentEncounterEvent.__name__,
             occurred_at=times[1], department="Family Medicine",
             actor_id="PROV-001", related_event_id=event_ids[0],
             encounter_id=encounter_id,
@@ -49,7 +41,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
             location="Clinic Room 4", disposition="testing_ordered",
         )
         lab_order = LabOrderEvent(
-            event_id=event_ids[2], patient_id=patient_id, event_type=LAB_ORDER,
+            event_id=event_ids[2], patient_id=patient_id, event_type=LabOrderEvent.__name__,
             occurred_at=times[2], department="Laboratory",
             actor_id="PROV-001", related_event_id=event_ids[1],
             encounter_id=encounter_id,
@@ -60,7 +52,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
             priority="routine", ordering_provider_id="PROV-001",
         )
         imaging_order = ImagingOrderEvent(
-            event_id=event_ids[3], patient_id=patient_id, event_type=IMAGING_ORDER,
+            event_id=event_ids[3], patient_id=patient_id, event_type=ImagingOrderEvent.__name__,
             occurred_at=times[3], department="Radiology",
             actor_id="PROV-001", related_event_id=event_ids[1],
             encounter_id=encounter_id,
@@ -71,7 +63,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
             priority="routine", ordering_provider_id="PROV-001",
         )
         result = ObservationResultEvent(
-            event_id=event_ids[4], patient_id=patient_id, event_type=OBSERVATION_RESULT,
+            event_id=event_ids[4], patient_id=patient_id, event_type=ObservationResultEvent.__name__,
             occurred_at=times[4], department="Laboratory",
             actor_id="LAB-TECH-01", related_event_id=event_ids[2],
             encounter_id=encounter_id,
@@ -82,7 +74,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
             abnormal_flag="false",
         )
         follow_up = AppointmentEncounterEvent(
-            event_id=event_ids[5], patient_id=patient_id, event_type=FOLLOW_UP_APPOINTMENT,
+            event_id=event_ids[5], patient_id=patient_id, event_type=AppointmentEncounterEvent.__name__,
             occurred_at=times[5], department="Family Medicine",
             actor_id="STAFF-SCHED-01", related_event_id=event_ids[4],
             encounter_id=encounter_id,

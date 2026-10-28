@@ -10,12 +10,12 @@ def test_patient_generation_is_deterministic_and_fictional() -> None:
 def test_events_form_a_linked_patient_workflow() -> None:
     events = generate_events(generate_patients(1))
     assert [event["event_type"] for event in events] == [
-        "patient_registration",
-        "encounter",
-        "lab_order",
-        "imaging_order",
-        "observation_result",
-        "follow_up_appointment",
+        "PatientRegistrationEvent",
+        "AppointmentEncounterEvent",
+        "LabOrderEvent",
+        "ImagingOrderEvent",
+        "ObservationResultEvent",
+        "AppointmentEncounterEvent",
     ]
     assert [event["related_event_id"] for event in events] == [
         "",
