@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from his_rag.graph.event_graph_types import EventGraphTypes
 
 
@@ -59,27 +61,25 @@ class Neo4jRepository:
             ).consume()
 
     def subgraph_for_patient(self, patient_id: str) -> dict[str, list[dict[str, object]]]:
-        relationship_types = list(EventGraphTypes.EVANT_GRAPH_RELATIONSHIPS.values())
         with self.driver.session(database=self.database) as session:
             result = session.run(
                 "MATCH (patient:Patient {patient_id: $patient_id})-[link]->(event:Event) "
-                "WHERE type(link) IN $relationship_types "
                 "RETURN [{labels: labels(patient), properties: properties(patient)}, "
                 "{labels: labels(event), properties: properties(event)}] AS nodes, "
                 "[{type: type(link), "
-                "sourceId: coalesce(startNode(link).patient_id, startNode(link).event_id), "
-                "targetId: coalesce(endNode(link).patient_id, endNode(link).event_id)}] AS relationships",
+                "sourceId: patient.patient_id, "
+                "targetId: event.event_id}] AS relationships",
                 patient_id=patient_id,
-                relationship_types=relationship_types,
             )
 
             nodes_by_id: dict[str, dict[str, object]] = {}
             relationships_by_key: dict[tuple[str, str, str], dict[str, object]] = {}
             for record in result:
+
                 for node in record["nodes"]:
                     properties = dict(node["properties"])
                     labels = set(node["labels"])
-                    node_id = properties.get("patient_id") or properties.get("event_id")
+                    node_id = properties.get("patient_id" if "Patient" in labels else "event_id")
                     if node_id is None:
                         continue
                     node_type = "Patient" if "Patient" in labels else next(

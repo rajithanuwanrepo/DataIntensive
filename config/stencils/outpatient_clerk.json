@@ -1,17 +1,51 @@
 {
-    "role": "outpatient_clerk",
-    "entities": {
-        "PatientRegistrationEvent": ["patientId"],
-        "AppointmentEncounterEvent": ["appointmentId", "scheduledDate", "status"],
-        "LabOrderEvent": ["orderId", "orderType", "status"],
-        "ImagingOrderEvent": ["orderId", "orderType", "status"],
-        "ObservationResultEvent": ["completionStatus", "completedAt"]
+  "role": "outpatient_clerk",
+  "root_type": "Patient",
+  "nodes": {
+    "Patient": {
+      "properties": ["patient_id"]
     },
-    "relationships": [
-        "hasPatientRegistrationEvent",
-        "hasAppointmentEncounterEvent",
-        "hasLabOrderEvent",
-        "hasImagingOrderEvent",
-        "hasObservationResultEvent"
-    ]
+    "PatientRegistrationEvent": {
+      "properties": ["patient_id"]
+    },
+    "AppointmentEncounterEvent": {
+      "properties": ["appointment_id", "appointment_datetime", "appointment_status"]
+    },
+    "LabOrderEvent": {
+      "properties": ["event_id", "event_type", "order_status"]
+    },
+    "ImagingOrderEvent": {
+      "properties": ["event_id", "event_type", "order_status"]
+    },
+    "ObservationResultEvent": {
+      "properties": ["completion_status", "completed_at"]
+    }
+  },
+  "relationships": [
+    {
+      "source_type": "Patient",
+      "type": "hasPatientRegistrationEvent",
+      "target_type": "PatientRegistrationEvent"
+    },
+    {
+      "source_type": "Patient",
+      "type": "hasAppointmentEncounterEvent",
+      "target_type": "AppointmentEncounterEvent"
+    },
+    {
+      "source_type": "Patient",
+      "type": "hasLabOrderEvent",
+      "target_type": "LabOrderEvent"
+    },
+    {
+      "source_type": "Patient",
+      "type": "hasImagingOrderEvent",
+      "target_type": "ImagingOrderEvent"
+    },
+    {
+      "source_type": "Patient",
+      "type": "hasObservationResultEvent",
+      "target_type": "ObservationResultEvent"
+    }
+  ]
 }

@@ -60,9 +60,18 @@ it updates existing patient and event nodes rather than duplicating them.
 
 ## Privacy model
 
-`config/stencils/outpatient_clerk.json` defines fields visible to the
-`outpatient_clerk` role. The stencil engine masks other fields before evidence
-is added to the prompt. This starter is for experimentation, not clinical use
+`config/stencils/outpatient_clerk.json` defines a graph template for the
+`outpatient_clerk` role. `root_type` identifies the patient root; `nodes` lists
+the permitted property names for each node type, using the stored property
+names. Each relationship rule specifies `source_type`, `type`, and `target_type`.
+Unlisted node types, properties, and relationships are excluded, along with
+events without a permitted direct relationship from the patient root.
+The filtered graph keeps the same `nodes`, `relationships`, and `properties`
+structure as the evidence. Node IDs and types remain visible as structural
+metadata. The pipeline uses this filtered graph for both returned evidence and
+the LLM context. The diagnostic JSON prints still show the input before masking.
+
+This starter is for experimentation, not clinical use
 or production privacy enforcement; validate authorization rules independently
 before adapting it to real data.
 

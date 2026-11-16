@@ -1,8 +1,10 @@
 """End-to-end privacy-filtered retrieval and mock generation."""
 
 from __future__ import annotations
+import json
 
 from his_rag.graph.graph_repository import GraphRepository
+from his_rag.privacy.stencil_engine import apply_stencil_to_subgraph
 from his_rag.rag.context_builder import build_context
 from his_rag.rag.llm_client import MockLLMClient
 from his_rag.rag.prompt_builder import build_prompt
@@ -19,7 +21,10 @@ class RAGPipeline:
     def ask(self, question: str, patient_id: str | None = None) -> dict[str, object]:
         query = analyze_query(question)
         selected_patient = patient_id or query["patient_id"]
-        evidence = retrieve_evidence(selected_patient, self.repository)
-        context = build_context(evidence, self.stencil)
+        raw_evidence = retrieve_evidence(selected_patient, self.repository)
+        evidence = apply_stencil_to_subgraph(raw_evidence, self.stencil)
+        context = build_context(evidence)
+        print("Filtered evidence subgraph after masking:")
+        print(json.dumps(evidence, indent=2, ensure_ascii=False, default=str))
         answer = self.llm.generate(build_prompt(question, context))
         return {"answer": answer, "evidence": evidence, "context": context}
