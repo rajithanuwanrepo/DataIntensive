@@ -25,7 +25,7 @@ class RAGPipeline:
         raw_evidence = retrieve_evidence(selected_patient, self.repository)
         evidence = apply_stencil_to_subgraph(raw_evidence, self.stencil)
         context = build_context(evidence)
-        # print("Filtered evidence subgraph after masking:")
-        # print(json.dumps(evidence, indent=2, ensure_ascii=False, default=str))
+        print("Filtered evidence subgraph after masking:")
+        print(json.dumps(evidence, indent=2, ensure_ascii=False, default=str))
         answer = self.llm.generate(build_prompt(question, context))
         return {"answer": answer, "evidence": evidence, "context": context}

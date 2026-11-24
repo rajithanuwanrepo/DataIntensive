@@ -6,19 +6,16 @@
       "properties": ["patient_id"]
     },
     "PatientRegistrationEvent": {
-      "properties": ["patient_id"]
+      "properties": ["event_id","patient_id", "generated_datetime", "event_type"]
     },
     "AppointmentEncounterEvent": {
-      "properties": ["appointment_id", "appointment_datetime", "appointment_status"]
+      "properties": ["event_id","appointment_id", "appointment_datetime", "appointment_status", "generated_datetime", "event_type"]
     },
     "LabOrderEvent": {
-      "properties": ["event_id", "event_type", "order_status"]
+      "properties": ["event_id", "order_status", "generated_datetime", "event_type"]
     },
     "ImagingOrderEvent": {
-      "properties": ["event_id", "event_type", "order_status"]
-    },
-    "ObservationResultEvent": {
-      "properties": ["completion_status", "completed_at"]
+      "properties": ["event_id", "order_status", "generated_datetime", "event_type"]
     }
   },
   "relationships": [
@@ -41,11 +38,6 @@
       "source_type": "Patient",
       "type": "hasImagingOrderEvent",
       "target_type": "ImagingOrderEvent"
-    },
-    {
-      "source_type": "Patient",
-      "type": "hasObservationResultEvent",
-      "target_type": "ObservationResultEvent"
     }
   ]
 }
