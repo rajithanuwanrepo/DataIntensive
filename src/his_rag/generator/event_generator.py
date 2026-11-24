@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta
+
 from his_rag.models.events import (
     AppointmentEncounterEvent,
     ImagingOrderEvent,
@@ -24,7 +26,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
 
         registration = PatientRegistrationEvent(
             event_id=event_ids[0], patient_id=patient_id, event_type=PatientRegistrationEvent.__name__,
-            occurred_at=times[0], department="Patient Access",
+            generated_datetime=times[0], department="Patient Access",
             actor_id="STAFF-REG-01", related_event_id="", description="Fictional outpatient registration.",
             encounter_id=None,
             registration_type="outpatient", registration_source="scheduled_referral",
@@ -32,7 +34,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
         )
         encounter = AppointmentEncounterEvent(
             event_id=event_ids[1], patient_id=patient_id, event_type=AppointmentEncounterEvent.__name__,
-            occurred_at=times[1], department="Family Medicine",
+            generated_datetime=times[1], department="Family Medicine",
             actor_id="PROV-001", related_event_id=event_ids[0],
             encounter_id=encounter_id,
             description="Fictional initial outpatient assessment.", encounter_class="outpatient",
@@ -42,7 +44,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
         )
         lab_order = LabOrderEvent(
             event_id=event_ids[2], patient_id=patient_id, event_type=LabOrderEvent.__name__,
-            occurred_at=times[2], department="Laboratory",
+            generated_datetime=times[2], department="Laboratory",
             actor_id="PROV-001", related_event_id=event_ids[1],
             encounter_id=encounter_id,
             description="Fictional complete blood count order.", order_code="CBC",
@@ -53,7 +55,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
         )
         imaging_order = ImagingOrderEvent(
             event_id=event_ids[3], patient_id=patient_id, event_type=ImagingOrderEvent.__name__,
-            occurred_at=times[3], department="Radiology",
+            generated_datetime=times[3], department="Radiology",
             actor_id="PROV-001", related_event_id=event_ids[1],
             encounter_id=encounter_id,
             description="Fictional chest imaging order.", order_code="XR-CHEST-2V",
@@ -64,7 +66,7 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
         )
         result = ObservationResultEvent(
             event_id=event_ids[4], patient_id=patient_id, event_type=ObservationResultEvent.__name__,
-            occurred_at=times[4], department="Laboratory",
+            generated_datetime=times[4], department="Laboratory",
             actor_id="LAB-TECH-01", related_event_id=event_ids[2],
             encounter_id=encounter_id,
             description="Fictional laboratory result.", order_id=event_ids[2],
@@ -73,14 +75,17 @@ def generate_events(patients: list[dict[str, str]]) -> list[dict[str, str]]:
             reference_range="12.0-16.0", interpretation="within_reference_range",
             abnormal_flag="false",
         )
+        follow_up_datetime = (
+            datetime.strptime(times[5], "%Y-%m-%dT%H:%M:%SZ") + timedelta(days=7)
+        ).strftime("%Y-%m-%dT%H:%M:%SZ")
         follow_up = AppointmentEncounterEvent(
             event_id=event_ids[5], patient_id=patient_id, event_type=AppointmentEncounterEvent.__name__,
-            occurred_at=times[5], department="Family Medicine",
+            generated_datetime=times[5], department="Family Medicine",
             actor_id="STAFF-SCHED-01", related_event_id=event_ids[4],
             encounter_id=encounter_id,
             description="Fictional appointment to review results.", encounter_class="appointment",
             appointment_id=f"APT-{patient_index + 1:05d}-F", appointment_status="pending",
-            appointment_datetime=times[5], chief_complaint="Review test results",
+            appointment_datetime=follow_up_datetime, chief_complaint="Review test results",
             location="Clinic Room 4", disposition="planned",
         )
         events.extend(

@@ -11,7 +11,7 @@ class Event:
     event_id: str
     patient_id: str
     event_type: str
-    occurred_at: str
+    generated_datetime: str
     department: str
     actor_id: str
     related_event_id: str

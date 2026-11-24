@@ -83,8 +83,33 @@ before adapting it to real data.
 - `python scripts/ask_question.py "..."`: run one question and exit.
 - `python scripts/run_evaluation.py`: write the sample evaluation report.
 
-Set `HIS_RAG_LLM_MODE` to `mock` (the default). `.env.example` documents the
-configuration keys; a production LLM client is intentionally not included.
+## Local Ollama
+
+The question and evaluation scripts support `HIS_RAG_LLM_MODE=mock` (the
+default) or `ollama`. The Ollama client uses Python's standard library, so no
+additional Python dependencies or API keys are required for a local model.
+
+Open the Ollama app, or run `ollama serve` if the server is not already running.
+Run `ollama ls` to find the exact name of a downloaded local model, then export
+the settings in the terminal where you run the project:
+
+```bash
+export HIS_RAG_LLM_MODE=ollama
+export OLLAMA_MODEL="llama3.2:3b"
+export OLLAMA_BASE_URL=http://localhost:11434
+.venv/bin/python scripts/ask_question.py "When is the follow-up appointment?" --patient-id P-1001
+```
+
+The example uses `llama3.2:3b`; replace it with the name from `ollama ls` if needed.
+Download your chosen model first with `ollama pull <model-name>` if it is missing.
+The client posts the question and stencil-filtered evidence to
+`/api/generate` with streaming disabled, then reads the generated answer.
+Connection, model, and response errors are reported rather than falling back
+to a mock answer. Each generation request has a 180-second timeout.
+
+`OLLAMA_BASE_URL` defaults to `http://localhost:11434`. `.env.example` documents
+the settings; `.env` files are not loaded automatically, so export variables
+in your shell. Use `export HIS_RAG_LLM_MODE=mock` to switch back to the mock.
 
 
 <!-- cleanup -->

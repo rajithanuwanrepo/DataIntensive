@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from his_rag.generator.event_generator import generate_events
 from his_rag.generator.patient_generator import generate_patients
 
@@ -25,7 +27,7 @@ def test_events_form_a_linked_patient_workflow() -> None:
         events[2]["event_id"],
         events[4]["event_id"],
     ]
-    assert all("occurred_at" in event and "status" not in event for event in events)
+    assert all("generated_datetime" in event and "status" not in event for event in events)
     assert events[4]["order_id"] == events[2]["event_id"]
     assert "modality" not in events[2]
     assert events[3]["modality"] == "x_ray"
@@ -33,8 +35,11 @@ def test_events_form_a_linked_patient_workflow() -> None:
     assert len({event["encounter_id"] for event in encounter_events}) == 1
     assert events[0]["encounter_id"] is None
     assert events[1]["appointment_status"] == "completed"
-    assert events[1]["appointment_datetime"] == events[1]["occurred_at"]
+    assert events[1]["appointment_datetime"] == events[1]["generated_datetime"]
     assert events[5]["appointment_status"] == "pending"
+    follow_up_generated = datetime.fromisoformat(events[5]["generated_datetime"].replace("Z", "+00:00"))
+    follow_up_scheduled = datetime.fromisoformat(events[5]["appointment_datetime"].replace("Z", "+00:00"))
+    assert follow_up_scheduled - follow_up_generated == timedelta(days=7)
     assert events[5]["appointment_datetime"] > events[1]["appointment_datetime"]
 
 
