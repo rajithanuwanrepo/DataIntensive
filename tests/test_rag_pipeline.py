@@ -78,3 +78,24 @@ def test_pipeline_only_exposes_stencil_allowed_fields(allow_relationship, use_ol
     assert len(result["evidence"]["nodes"]) == (2 if allow_relationship else 1)
     assert len(result["evidence"]["relationships"]) == int(allow_relationship)
     assert repository.events["E-1"]["name"] == "Private"
+
+
+def test_pipeline_can_disable_masking_for_one_question() -> None:
+    repository = build_graph(
+        [{"patient_id": "P-1", "name": "Private"}], [], FakeRepository(),
+    )
+    stencil = {
+        "root_type": "Patient",
+        "nodes": {"Patient": {"properties": ["patient_id"]}},
+        "relationships": [],
+    }
+    client = MagicMock()
+    pipeline = RAGPipeline(repository, stencil, llm=client)
+
+    unmasked = pipeline.ask("P-1", mask=False)
+    assert unmasked["evidence"] == repository.subgraph_for_patient("P-1")
+    assert "Private" in client.generate.call_args.args[0]
+
+    masked = pipeline.ask("P-1", mask=True)
+    assert "Private" not in masked["context"]
+    assert "Private" not in client.generate.call_args.args[0]

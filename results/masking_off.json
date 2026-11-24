@@ -1,1 +1,186 @@
-[]
+[
+  {
+    "question_id": "Q-1",
+    "evidence": {
+      "nodes": [
+        {
+          "id": "P-1001",
+          "type": "Patient",
+          "properties": {
+            "phone": "555-0001",
+            "patient_id": "P-1001",
+            "date_of_birth": "1976-01-01",
+            "name": "Fictional Patient 2"
+          }
+        },
+        {
+          "id": "E-2001-01",
+          "type": "PatientRegistrationEvent",
+          "properties": {
+            "registration_source": "scheduled_referral",
+            "event_id": "E-2001-01",
+            "event_type": "PatientRegistrationEvent",
+            "patient_id": "P-1001",
+            "description": "Fictional outpatient registration.",
+            "external_record_id": "EXT-00002",
+            "related_event_id": "",
+            "consent_status": "documented",
+            "actor_id": "STAFF-REG-01",
+            "department": "Patient Access",
+            "generated_datetime": "2025-01-02T09:00:00Z",
+            "registration_type": "outpatient"
+          }
+        },
+        {
+          "id": "E-2001-02",
+          "type": "AppointmentEncounterEvent",
+          "properties": {
+            "appointment_status": "completed",
+            "description": "Fictional initial outpatient assessment.",
+            "encounter_class": "outpatient",
+            "appointment_id": "APT-00002",
+            "related_event_id": "E-2001-01",
+            "disposition": "testing_ordered",
+            "event_id": "E-2001-02",
+            "event_type": "AppointmentEncounterEvent",
+            "patient_id": "P-1001",
+            "appointment_datetime": "2025-01-02T10:00:00Z",
+            "chief_complaint": "Routine follow-up",
+            "location": "Clinic Room 4",
+            "actor_id": "PROV-001",
+            "department": "Family Medicine",
+            "encounter_id": "ENC-00002",
+            "generated_datetime": "2025-01-02T10:00:00Z"
+          }
+        },
+        {
+          "id": "E-2001-06",
+          "type": "AppointmentEncounterEvent",
+          "properties": {
+            "appointment_status": "pending",
+            "description": "Fictional appointment to review results.",
+            "encounter_class": "appointment",
+            "appointment_id": "APT-00002-F",
+            "related_event_id": "E-2001-05",
+            "disposition": "planned",
+            "event_id": "E-2001-06",
+            "event_type": "AppointmentEncounterEvent",
+            "patient_id": "P-1001",
+            "appointment_datetime": "2025-01-09T14:00:00Z",
+            "chief_complaint": "Review test results",
+            "location": "Clinic Room 4",
+            "actor_id": "STAFF-SCHED-01",
+            "department": "Family Medicine",
+            "encounter_id": "ENC-00002",
+            "generated_datetime": "2025-01-02T14:00:00Z"
+          }
+        },
+        {
+          "id": "E-2001-03",
+          "type": "LabOrderEvent",
+          "properties": {
+            "code_system": "LOCAL",
+            "description": "Fictional complete blood count order.",
+            "related_event_id": "E-2001-02",
+            "priority": "routine",
+            "order_name": "Complete blood count",
+            "order_code": "CBC",
+            "order_status": "ordered",
+            "event_id": "E-2001-03",
+            "event_type": "LabOrderEvent",
+            "patient_id": "P-1001",
+            "specimen": "whole_blood",
+            "collection_method": "venipuncture",
+            "actor_id": "PROV-001",
+            "department": "Laboratory",
+            "encounter_id": "ENC-00002",
+            "generated_datetime": "2025-01-02T11:00:00Z",
+            "fasting_required": false,
+            "ordering_provider_id": "PROV-001"
+          }
+        },
+        {
+          "id": "E-2001-04",
+          "type": "ImagingOrderEvent",
+          "properties": {
+            "modality": "x_ray",
+            "code_system": "LOCAL",
+            "description": "Fictional chest imaging order.",
+            "related_event_id": "E-2001-02",
+            "body_site": "chest",
+            "priority": "routine",
+            "laterality": "not_applicable",
+            "order_name": "Chest radiograph, two views",
+            "order_code": "XR-CHEST-2V",
+            "order_status": "ordered",
+            "event_id": "E-2001-04",
+            "event_type": "ImagingOrderEvent",
+            "patient_id": "P-1001",
+            "contrast": "none",
+            "actor_id": "PROV-001",
+            "department": "Radiology",
+            "encounter_id": "ENC-00002",
+            "generated_datetime": "2025-01-02T12:00:00Z",
+            "ordering_provider_id": "PROV-001"
+          }
+        },
+        {
+          "id": "E-2001-05",
+          "type": "ObservationResultEvent",
+          "properties": {
+            "description": "Fictional laboratory result.",
+            "related_event_id": "E-2001-03",
+            "abnormal_flag": "false",
+            "completed_at": "2025-01-02T13:00:00Z",
+            "unit": "g/dL",
+            "event_id": "E-2001-05",
+            "event_type": "ObservationResultEvent",
+            "interpretation": "within_reference_range",
+            "patient_id": "P-1001",
+            "completion_status": "completed",
+            "result_code": "HGB",
+            "result_value": "13.8",
+            "reference_range": "12.0-16.0",
+            "actor_id": "LAB-TECH-01",
+            "department": "Laboratory",
+            "encounter_id": "ENC-00002",
+            "order_id": "E-2001-03",
+            "generated_datetime": "2025-01-02T13:00:00Z"
+          }
+        }
+      ],
+      "relationships": [
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-01",
+          "type": "hasPatientRegistrationEvent"
+        },
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-02",
+          "type": "hasAppointmentEncounterEvent"
+        },
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-06",
+          "type": "hasAppointmentEncounterEvent"
+        },
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-03",
+          "type": "hasLabOrderEvent"
+        },
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-04",
+          "type": "hasImagingOrderEvent"
+        },
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-05",
+          "type": "hasObservationResultEvent"
+        }
+      ]
+    }
+  }
+]

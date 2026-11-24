@@ -1,10 +1,9 @@
-"""Run the bundled single-question smoke evaluation."""
+"""Save masked and unmasked answers and evidence for the evaluation questions."""
 
 import json
 from pathlib import Path
+from time import sleep
 
-from his_rag.evaluation.evaluator import evaluate_answer
-from his_rag.graph.graph_builder import build_graph
 from his_rag.graph.neo4j_repository import Neo4jRepository
 from his_rag.privacy.stencil_loader import load_stencil
 from his_rag.rag.llm_client import create_llm_client
@@ -15,28 +14,39 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main() -> None:
     data = ROOT / "data"
-    patients = json.loads((data / "synthetic" / "patients.json").read_text(encoding="utf-8"))
-    events = json.loads((data / "synthetic" / "events.json").read_text(encoding="utf-8"))
     questions = json.loads((data / "evaluation" / "questions.json").read_text(encoding="utf-8"))
-    expected = json.loads((data / "evaluation" / "expected_answers.json").read_text(encoding="utf-8"))
     llm = create_llm_client()
     repository = Neo4jRepository()
     try:
         pipeline = RAGPipeline(
-            build_graph(patients, events, repository),
+            repository,
             load_stencil(ROOT / "config" / "stencils" / "outpatient_clerk.json"),
             llm=llm,
         )
-        expected_by_id = {item["question_id"]: item for item in expected}
-        report = []
-        for item in questions:
-            result = pipeline.ask(item["question"], item["patient_id"])
-            metrics = evaluate_answer(result["answer"], expected_by_id[item["question_id"]]["expected_terms"])
-            report.append({"question_id": item["question_id"], **metrics})
-        output = ROOT / "results" / "masking_on.json"
-        output.parent.mkdir(exist_ok=True)
-        output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        print(json.dumps(report, indent=2))
+        results_dir = ROOT / "results"
+        results_dir.mkdir(exist_ok=True)
+        for mode, mask in (("masking_on", True), ("masking_off", False)):
+            report = []
+            evidence_report = []
+            for item in questions:
+                result = pipeline.ask(item["question"], item["patient_id"], mask=mask)
+                report.append(f'{item["question_id"]}\n{result["answer"]}')
+                evidence_report.append({
+                    "question_id": item["question_id"],
+                    "evidence": result["evidence"],
+                })
+            output = results_dir / f"{mode}.txt"
+            payload = "\n\n".join(report)
+            output.write_text(payload + "\n" if report else "", encoding="utf-8")
+            (results_dir / f"{mode}.json").write_text(
+                json.dumps(evidence_report, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            print("successfully wrote results to", output and results_dir / f"{mode}.json")
+            # print(f"{output.name}\n{payload}")
+            if mask:
+                print("Starting the unmasked run in 5 seconds.", flush=True)
+                sleep(5)
     finally:
         repository.close()
 

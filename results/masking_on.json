@@ -1,6 +1,97 @@
 [
   {
     "question_id": "Q-1",
-    "term_recall": 1.0
+    "evidence": {
+      "nodes": [
+        {
+          "id": "P-1001",
+          "type": "Patient",
+          "properties": {
+            "patient_id": "P-1001"
+          }
+        },
+        {
+          "id": "E-2001-01",
+          "type": "PatientRegistrationEvent",
+          "properties": {
+            "event_id": "E-2001-01",
+            "event_type": "PatientRegistrationEvent",
+            "patient_id": "P-1001",
+            "generated_datetime": "2025-01-02T09:00:00Z"
+          }
+        },
+        {
+          "id": "E-2001-02",
+          "type": "AppointmentEncounterEvent",
+          "properties": {
+            "appointment_status": "completed",
+            "appointment_id": "APT-00002",
+            "event_id": "E-2001-02",
+            "event_type": "AppointmentEncounterEvent",
+            "appointment_datetime": "2025-01-02T10:00:00Z",
+            "generated_datetime": "2025-01-02T10:00:00Z"
+          }
+        },
+        {
+          "id": "E-2001-06",
+          "type": "AppointmentEncounterEvent",
+          "properties": {
+            "appointment_status": "pending",
+            "appointment_id": "APT-00002-F",
+            "event_id": "E-2001-06",
+            "event_type": "AppointmentEncounterEvent",
+            "appointment_datetime": "2025-01-09T14:00:00Z",
+            "generated_datetime": "2025-01-02T14:00:00Z"
+          }
+        },
+        {
+          "id": "E-2001-03",
+          "type": "LabOrderEvent",
+          "properties": {
+            "order_status": "ordered",
+            "event_id": "E-2001-03",
+            "event_type": "LabOrderEvent",
+            "generated_datetime": "2025-01-02T11:00:00Z"
+          }
+        },
+        {
+          "id": "E-2001-04",
+          "type": "ImagingOrderEvent",
+          "properties": {
+            "order_status": "ordered",
+            "event_id": "E-2001-04",
+            "event_type": "ImagingOrderEvent",
+            "generated_datetime": "2025-01-02T12:00:00Z"
+          }
+        }
+      ],
+      "relationships": [
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-01",
+          "type": "hasPatientRegistrationEvent"
+        },
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-02",
+          "type": "hasAppointmentEncounterEvent"
+        },
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-06",
+          "type": "hasAppointmentEncounterEvent"
+        },
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-03",
+          "type": "hasLabOrderEvent"
+        },
+        {
+          "sourceId": "P-1001",
+          "targetId": "E-2001-04",
+          "type": "hasImagingOrderEvent"
+        }
+      ]
+    }
   }
 ]

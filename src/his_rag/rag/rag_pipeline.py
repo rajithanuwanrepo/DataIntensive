@@ -19,13 +19,19 @@ class RAGPipeline:
         self.stencil = stencil
         self.llm = llm or MockLLMClient()
 
-    def ask(self, question: str, patient_id: str | None = None) -> dict[str, object]:
+    def ask(
+        self, question: str, patient_id: str | None = None, *, mask: bool = True,
+    ) -> dict[str, object]:
         query = analyze_query(question)
         selected_patient = patient_id or query["patient_id"]
         raw_evidence = retrieve_evidence(selected_patient, self.repository)
-        evidence = apply_stencil_to_subgraph(raw_evidence, self.stencil)
+        if mask is False:
+            evidence = raw_evidence
+            print("Unmasked evidence subgraph:")
+        else:
+            evidence = apply_stencil_to_subgraph(raw_evidence, self.stencil)
+            print("Filtered evidence subgraph after masking:")
         context = build_context(evidence)
-        print("Filtered evidence subgraph after masking:")
         print(json.dumps(evidence, indent=2, ensure_ascii=False, default=str))
         answer = self.llm.generate(build_prompt(question, context))
         return {"answer": answer, "evidence": evidence, "context": context}
